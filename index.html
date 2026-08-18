@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎀 Sweet Recipe Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #fff5f8;
+    --bg-soft: #ffeaf1;
+    --card: #ffffff;
+    --pink-soft: #ffd6e8;
+    --pink: #ff9ebb;
+    --pink-deep: #e75480;
+    --lavender: #e5d6f7;
+    --lavender-deep: #b08fdb;
+    --sage: #c7e3c0;
+    --sage-deep: #7fae72;
+    --gold: #f4c542;
+    --text: #5b3a4b;
+    --text-light: #a4808f;
+    --line: #f3d3e0;
+    --shadow: 0 8px 24px rgba(231, 84, 128, 0.12);
+    --radius: 18px;
+    --font-display: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+    --font-body: 'Quicksand', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+      radial-gradient(circle at 8% 12%, rgba(255,182,204,0.35), transparent 40%),
+      radial-gradient(circle at 95% 85%, rgba(213,183,240,0.30), transparent 45%),
+      var(--bg);
+    min-height:100vh;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  /* ---------- layout ---------- */
+  .app{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    min-height:100vh;
+  }
+  .sidebar{
+    background: linear-gradient(180deg, #fff 0%, var(--bg-soft) 100%);
+    border-right: 2px dashed var(--pink);
+    padding: 22px 18px 30px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight:600;
+    color: var(--pink-deep);
+  }
+  .brand .sparkle{ font-size:20px; }
+  .subtitle{
+    font-size:12.5px;
+    color: var(--text-light);
+    margin-top:-10px;
+  }
+
+  .btn{
+    border:none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-family: var(--font-body);
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    justify-content:center;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0px) scale(.98); }
+  .btn-primary{ background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%); color:#fff; box-shadow: var(--shadow);}
+  .btn-lavender{ background: linear-gradient(135deg, var(--lavender) 0%, var(--lavender-deep) 100%); color:#fff; }
+  .btn-outline{ background:#fff; color: var(--pink-deep); border:2px solid var(--pink-soft); }
+  .btn-ghost{ background:transparent; color: var(--text-light); padding:6px 10px; font-size:12.5px;}
+  .btn-danger{ background: #fff0f0; color:#c74545; border:2px solid #ffd4d4; }
+  .btn-sm{ padding:6px 12px; font-size:12px; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+  .sidebar-actions{ display:flex; flex-direction:column; gap:8px; }
+
+  .search-mode-toggle{
+    display:flex;
+    background: var(--bg-soft);
+    border-radius: 999px;
+    padding:3px;
+    gap:3px;
+  }
+  .mode-btn{
+    flex:1;
+    border:none;
+    background:transparent;
+    color: var(--text-light);
+    font-family: var(--font-body);
+    font-weight:700;
+    font-size:11.5px;
+    padding:7px 6px;
+    border-radius:999px;
+    cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .mode-btn.active{
+    background: linear-gradient(135deg, var(--pink) 0%, var(--pink-deep) 100%);
+    color:#fff;
+    box-shadow: 0 3px 8px rgba(231,84,128,0.25);
+  }
+  .search-box{
+    position:relative;
+  }
+  .search-box input{
+    width:100%;
+    padding:9px 12px 9px 32px;
+    border-radius: 999px;
+    border: 2px solid var(--pink-soft);
+    font-family: var(--font-body);
+    font-size:13px;
+    background:#fff;
+    outline:none;
+  }
+  .search-box input:focus{ border-color: var(--pink-deep); }
+  .search-box .icon{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    font-size:13px; opacity:.6;
+  }
+  .ingredient-hint{
+    font-size:11px;
+    color: var(--text-light);
+    line-height:1.4;
+    padding: 2px 4px;
+  }
+  .ingredient-chip{
+    display:inline-block;
+    background: var(--sage);
+    color: #3c5c34;
+    font-size:10.5px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    margin:2px 4px 0 0;
+  }
+
+  .tree-wrap{
+    flex:1;
+    overflow-y:auto;
+    padding-right:2px;
+  }
+  .tree-wrap::-webkit-scrollbar{ width:6px; }
+  .tree-wrap::-webkit-scrollbar-thumb{ background: var(--pink-soft); border-radius:10px; }
+
+  .tree-node{ user-select:none; }
+  .tree-row{
+    display:flex; align-items:center; gap:6px;
+    padding:6px 8px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13.5px;
+    color: var(--text);
+  }
+  .tree-row:hover{ background: var(--pink-soft); }
+  .tree-row.active{ background: var(--pink); color:#fff; font-weight:700; }
+  .tree-row .caret{ width:12px; font-size:10px; color:var(--text-light); flex-shrink:0; }
+  .tree-row.active .caret{ color:#fff; }
+  .tree-children{ margin-left: 16px; border-left: 2px dotted var(--pink-soft); padding-left:6px;}
+  .tree-empty-hint{ font-size:12px; color:var(--text-light); padding:10px 8px; }
+
+  .no-folder{
+    font-size:12.5px;
+    color:var(--text-light);
+    background:#fff;
+    border:2px dashed var(--pink-soft);
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+    line-height:1.5;
+  }
+
+  /* ---------- main ---------- */
+  main{
+    padding: 26px 40px 60px;
+    overflow-y:auto;
+  }
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom: 22px;
+    flex-wrap:wrap;
+  }
+  .breadcrumb{
+    font-family: var(--font-display);
+    font-size: 20px;
+    color: var(--pink-deep);
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  }
+  .breadcrumb .crumb{ cursor:pointer; }
+  .breadcrumb .crumb:hover{ text-decoration:underline; }
+  .breadcrumb .sep{ color: var(--pink-soft); font-weight:400; }
+  .topbar-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* welcome */
+  .welcome{
+    max-width:640px;
+    margin: 40px auto;
+    text-align:center;
+    background:#fff;
+    border-radius: 26px;
+    padding: 46px 40px;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--pink-soft);
+  }
+  .welcome .emoji-row{ font-size:38px; margin-bottom:8px; }
+  .welcome h1{ font-family: var(--font-display); color:var(--pink-deep); margin: 6px 0 10px; font-size:28px; }
+  .welcome p{ color: var(--text-light); line-height:1.6; font-size:14.5px; margin-bottom:22px;}
+  .welcome .note{ font-size:12px; color:var(--text-light); margin-top:18px; }
+
+  /* recipe grid */
+  .recipe-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+  }
+  .recipe-card{
+    background:#fff;
+    border-radius: 16px;
+    border: 2px dashed var(--pink-soft);
+    padding: 18px 18px 16px;
+    cursor:pointer;
+    position:relative;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .recipe-card:hover{
+    transform: translateY(-3px) rotate(-0.4deg);
+    box-shadow: var(--shadow);
+    border-color: var(--pink);
+  }
+  .recipe-card .ribbon{
+    position:absolute; top:-8px; right:14px;
+    background: var(--gold);
+    color:#7a5b00;
+    font-size:10.5px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:999px;
+    box-shadow:0 2px 5px rgba(0,0,0,.12);
+  }
+  .recipe-card h3{
+    font-family: var(--font-display);
+    font-size:16.5px;
+    margin:4px 0 8px;
+    color: var(--text);
+  }
+  .recipe-card .meta{ font-size:11.5px; color:var(--text-light); display:flex; gap:10px; flex-wrap:wrap; }
+  .recipe-card .heart{ color: var(--pink-deep); }
+  .empty-state{
+    text-align:center;
+    color: var(--text-light);
+    padding: 60px 20px;
+    font-size:14px;
+  }
+  .empty-state .big{ font-size:34px; display:block; margin-bottom:10px;}
+
+  /* recipe detail card */
+  .recipe-detail{
+    max-width: 720px;
+    margin: 0 auto;
+    background:#fff;
+    border-radius: 22px;
+    border: 2px solid var(--pink-soft);
+    box-shadow: var(--shadow);
+    padding: 34px 38px 36px;
+    position:relative;
+  }
+  .recipe-detail:before{
+    content:"";
+    position:absolute; top:0; left:36px; right:36px; height:10px;
+    background: repeating-linear-gradient(90deg, var(--pink) 0 14px, var(--pink-soft) 14px 28px);
+    border-radius: 0 0 8px 8px;
+    opacity:.8;
+  }
+  .recipe-detail h1{
+    font-family: var(--font-display);
+    color: var(--pink-deep);
+    font-size: 28px;
+    margin: 10px 0 6px;
+  }
+  .recipe-meta-row{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:13px; color:var(--text-light);
+    margin-bottom:20px;
+    padding-bottom:16px;
+    border-bottom: 2px dashed var(--pink-soft);
+  }
+  .recipe-meta-row span b{ color:var(--text); }
+  .section-title{
+    font-family: var(--font-display);
+    font-size:16.5px;
+    color: var(--lavender-deep);
+    display:flex; align-items:center; gap:8px;
+    margin: 22px 0 10px;
+  }
+  ul.ingredients{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  ul.ingredients li{
+    display:flex; align-items:baseline; gap:8px;
+    font-size:14px; padding:6px 10px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+  }
+  ul.ingredients li:before{ content:"🩷"; font-size:11px; }
+  ol.instructions{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; counter-reset: step; }
+  ol.instructions li{
+    counter-increment: step;
+    display:flex; gap:12px; align-items:flex-start;
+    font-size:14px; line-height:1.55;
+  }
+  ol.instructions li:before{
+    content: counter(step);
+    flex-shrink:0;
+    width:26px; height:26px;
+    background: linear-gradient(135deg, var(--lavender), var(--lavender-deep));
+    color:#fff;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12.5px;
+  }
+  .notes-box{
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size:13.5px;
+    color: var(--text);
+    line-height:1.6;
+  }
+  .detail-actions{
+    display:flex; gap:8px; flex-wrap:wrap;
+    margin-top:26px;
+    padding-top:18px;
+    border-top: 2px dashed var(--pink-soft);
+  }
+
+  /* edit form */
+  .edit-form{
+    max-width: 720px;
+    margin: 0 auto;
+    background:#fff;
+    border-radius: 22px;
+    border: 2px solid var(--pink-soft);
+    box-shadow: var(--shadow);
+    padding: 30px 36px 34px;
+  }
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:700;
+    color: var(--lavender-deep);
+    margin-bottom:5px;
+  }
+  .field input[type=text], .field textarea, .field select{
+    width:100%;
+    border: 2px solid var(--pink-soft);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-family: var(--font-body);
+    font-size:14px;
+    color: var(--text);
+    outline:none;
+    resize:vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{ border-color: var(--pink-deep); }
+  .field-row{ display:flex; gap:12px; }
+  .field-row .field{ flex:1; }
+
+  .dyn-row{ display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  .dyn-row input{ border: 2px solid var(--pink-soft); border-radius:8px; padding:7px 9px; font-size:13.5px; font-family:var(--font-body); }
+  .dyn-row .amt{ width:70px; }
+  .dyn-row .unit{ width:100px; }
+  .dyn-row .item{ flex:1; }
+  .dyn-row .step-num{
+    width:26px; height:26px; border-radius:50%;
+    background: var(--lavender); color:var(--lavender-deep); font-weight:700; font-size:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .dyn-row textarea.item{ flex:1; min-height:44px; }
+  .icon-btn{
+    border:none; background: var(--bg-soft); color: var(--pink-deep);
+    width:28px; height:28px; border-radius:50%;
+    cursor:pointer; font-size:14px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-btn:hover{ background: var(--pink-soft); }
+  .add-row-btn{
+    margin-top:4px;
+    background: var(--bg-soft);
+    color: var(--pink-deep);
+    border: 2px dashed var(--pink-soft);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .add-row-btn:hover{ background: var(--pink-soft); }
+  .form-actions{
+    display:flex; gap:10px; justify-content:flex-end;
+    margin-top:24px; padding-top:18px;
+    border-top:2px dashed var(--pink-soft);
+  }
+
+  /* modal / dialog */
+  dialog{
+    border:none; border-radius:20px; padding:0;
+    box-shadow: 0 20px 50px rgba(94, 35, 61, 0.28);
+    max-width: 420px; width: 90%;
+  }
+  dialog::backdrop{ background: rgba(91, 58, 75, 0.35); backdrop-filter: blur(2px); }
+  .modal-inner{ padding: 26px 26px 22px; }
+  .modal-inner h2{
+    font-family: var(--font-display); color: var(--pink-deep);
+    font-size:19px; margin:0 0 14px; display:flex; align-items:center; gap:8px;
+  }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+  .modal-inner p.hint{ font-size:12.5px; color:var(--text-light); margin: -8px 0 14px; }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background: var(--text); color:#fff;
+    padding:11px 20px; border-radius:999px;
+    font-size:13px; box-shadow:0 8px 20px rgba(0,0,0,.2);
+    opacity:0; pointer-events:none; transition: opacity .25s ease, transform .25s ease;
+    z-index: 999;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+
+  @media (max-width: 760px){
+    .app{ grid-template-columns: 1fr; }
+    .sidebar{ border-right:none; border-bottom:2px dashed var(--pink); }
+    main{ padding: 20px 18px 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="sparkle">🎀</span> Sweet Recipe Box</div>
+    <div class="subtitle">your recipes, saved as real files on your computer</div>
+
+    <div class="sidebar-actions">
+      <button class="btn btn-primary" id="btnOpenFolder">📂 Open Recipe Folder</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" id="btnNewCategory" style="flex:1" disabled>✨ New Category</button>
+        <button class="btn btn-outline btn-sm" id="btnNewRecipe" style="flex:1" disabled>📝 New Recipe</button>
+      </div>
+    </div>
+
+    <div class="search-mode-toggle">
+      <button class="mode-btn active" id="modeTitleBtn" type="button">🔍 By Title</button>
+      <button class="mode-btn" id="modeIngredientBtn" type="button">🥚 By Ingredients</button>
+    </div>
+    <div class="search-box">
+      <span class="icon" id="searchIcon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search recipes..." disabled>
+    </div>
+    <div class="ingredient-hint" id="ingredientHint" style="display:none;">
+      Type ingredients separated by commas — e.g. <i>eggs, milk</i> — to find recipes containing all of them 💕
+    </div>
+
+    <div class="tree-wrap" id="treeWrap">
+      <div class="no-folder">No folder open yet 💌<br>Click "Open Recipe Folder" above and choose (or create) a folder to store your recipes in.</div>
+    </div>
+  </aside>
+
+  <main id="mainArea">
+    <div class="welcome">
+      <div class="emoji-row">🧁🍓🎀</div>
+      <h1>Welcome to your Sweet Recipe Box!</h1>
+      <p>
+        This little app saves everything as plain markdown files right on your computer — no accounts,
+        no cloud, no internet required once it's open. Pick a folder to get started (an empty one, or the
+        sample <b>Recipes</b> folder that came with this app), and you can start creating categories and recipes.
+      </p>
+      <button class="btn btn-primary" id="btnOpenFolderCenter">📂 Open Recipe Folder</button>
+      <p class="note">Works best in Chrome, Edge, or Opera — these are the browsers that let a page talk to local files. Your files stay right where you put them; nothing is ever uploaded anywhere. 💕</p>
+    </div>
+  </main>
+</div>
+
+<!-- New Category Modal -->
+<dialog id="dlgNewCategory">
+  <div class="modal-inner">
+    <h2>🌷 New Category</h2>
+    <p class="hint">A category is just a folder — great for things like Breakfast, Desserts, or Family Favorites.</p>
+    <div class="field">
+      <label>Category name</label>
+      <input type="text" id="newCategoryName" placeholder="e.g. Desserts">
+    </div>
+    <div class="field">
+      <label>Create inside</label>
+      <select id="newCategoryParent"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dlgNewCategory.close()">Cancel</button>
+      <button class="btn btn-primary" id="confirmNewCategory">Create ✨</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- New Recipe Modal -->
+<dialog id="dlgNewRecipe">
+  <div class="modal-inner">
+    <h2>📝 New Recipe</h2>
+    <div class="field">
+      <label>Recipe title</label>
+      <input type="text" id="newRecipeName" placeholder="e.g. Strawberry Shortcake">
+    </div>
+    <div class="field">
+      <label>Save into category</label>
+      <select id="newRecipeParent"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dlgNewRecipe.close()">Cancel</button>
+      <button class="btn btn-primary" id="confirmNewRecipe">Create & Edit 🎀</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Move Modal -->
+<dialog id="dlgMove">
+  <div class="modal-inner">
+    <h2>💌 Move Recipe</h2>
+    <div class="field">
+      <label>Move to category</label>
+      <select id="moveTarget"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dlgMove.close()">Cancel</button>
+      <button class="btn btn-primary" id="confirmMove">Move</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Rename Modal -->
+<dialog id="dlgRename">
+  <div class="modal-inner">
+    <h2>✏️ Rename Recipe</h2>
+    <div class="field">
+      <label>New title</label>
+      <input type="text" id="renameValue">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dlgRename.close()">Cancel</button>
+      <button class="btn btn-primary" id="confirmRename">Rename</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Confirm Delete Modal -->
+<dialog id="dlgConfirm">
+  <div class="modal-inner">
+    <h2 id="confirmTitle">🗑️ Delete?</h2>
+    <p class="hint" id="confirmMessage">This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="dlgConfirm.close()">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================= State ======================= */
+const state = {
+  rootHandle: null,
+  tree: null,              // {name, kind:'directory', handle, path, children:[]}
+  expanded: new Set(),     // set of expanded folder paths
+  selectedFolderPath: null,// currently viewed folder ('' = root/all)
+  selectedRecipeNode: null,
+  searchTerm: '',
+  searchMode: 'title', // 'title' | 'ingredients'
+};
+
+const ingredientCache = new Map(); // path -> array of ingredient item strings (lowercase)
+
+const $ = (sel) => document.querySelector(sel);
+const mainArea = $('#mainArea');
+const treeWrap = $('#treeWrap');
+
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._tm);
+  toast._tm = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ======================= IndexedDB handle persistence ======================= */
+function idbOpen(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open('sweetRecipeBoxDB', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('handles');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, val){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').put(val, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function idbGet(key){
+  const db = await idbOpen();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction('handles','readonly');
+    const req = tx.objectStore('handles').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function verifyPermission(handle, readWrite=true){
+  const opts = {};
+  if (readWrite) opts.mode = 'readwrite';
+  if ((await handle.queryPermission(opts)) === 'granted') return true;
+  if ((await handle.requestPermission(opts)) === 'granted') return true;
+  return false;
+}
+
+/* ======================= Opening a folder ======================= */
+async function openFolder(){
+  if (!window.showDirectoryPicker){
+    alert("Sorry, your browser doesn't support opening local folders from a webpage. Please use Chrome, Edge, or Opera.");
+    return;
+  }
+  try{
+    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    state.rootHandle = handle;
+    await idbSet('rootDir', handle);
+    await loadTree();
+    toast(`Opened "${handle.name}" 🎀`);
+  }catch(e){
+    if (e.name !== 'AbortError') console.error(e);
+  }
+}
+
+async function tryRestoreFolder(){
+  try{
+    const handle = await idbGet('rootDir');
+    if (!handle) return;
+    const ok = await verifyPermission(handle);
+    if (!ok) return;
+    state.rootHandle = handle;
+    await loadTree();
+    toast(`Welcome back! Opened "${handle.name}" 🎀`);
+  }catch(e){ /* ignore */ }
+}
+
+/* ======================= Building the tree ======================= */
+async function buildTree(dirHandle, path=''){
+  const node = { name: dirHandle.name, kind:'directory', handle: dirHandle, path, children: [] };
+  for await (const [name, h] of dirHandle.entries()){
+    if (h.kind === 'directory'){
+      node.children.push(await buildTree(h, path ? `${path}/${name}` : name));
+    } else if (h.kind === 'file' && name.toLowerCase().endsWith('.md')){
+      node.children.push({ name, kind:'file', handle:h, path: path ? `${path}/${name}` : name });
+    }
+  }
+  node.children.sort((a,b)=>{
+    if (a.kind !== b.kind) return a.kind === 'directory' ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  return node;
+}
+
+async function loadTree(){
+  state.tree = await buildTree(state.rootHandle, '');
+  state.expanded.add('');
+  ingredientCache.clear();
+  $('#btnNewCategory').disabled = false;
+  $('#btnNewRecipe').disabled = false;
+  $('#searchInput').disabled = false;
+  if (state.selectedFolderPath === null){
+    state.selectedFolderPath = '';
+  }
+  renderTree();
+  await renderMain();
+}
+
+function findNode(path, node = state.tree){
+  if (!node) return null;
+  if (node.path === path) return node;
+  if (node.kind === 'directory'){
+    for (const c of node.children){
+      const found = findNode(path, c);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function allFolders(node = state.tree, list = []){
+  if (!node) return list;
+  list.push(node);
+  for (const c of node.children){
+    if (c.kind === 'directory') allFolders(c, list);
+  }
+  return list;
+}
+
+function allRecipes(node = state.tree, list = []){
+  if (!node) return list;
+  for (const c of node.children){
+    if (c.kind === 'file') list.push(c);
+    else allRecipes(c, list);
+  }
+  return list;
+}
+
+/* Returns this recipe's ingredient item names (lowercased), reading + parsing
+   the file only once per load (cached by path). */
+async function getIngredientItems(node){
+  if (ingredientCache.has(node.path)) return ingredientCache.get(node.path);
+  const file = await node.handle.getFile();
+  const text = await file.text();
+  const parsed = parseRecipeMarkdown(text);
+  const items = parsed.ingredients.map(i => i.item.toLowerCase()).filter(Boolean);
+  ingredientCache.set(node.path, items);
+  return items;
+}
+
+/* Finds every recipe whose ingredient list contains ALL of the given search
+   terms (each term matched as a substring against any ingredient name, so
+   "egg" matches "eggs" and vice versa). Returns [{node, matched:[...]}] */
+async function searchRecipesByIngredients(rawInput){
+  const terms = rawInput.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+  if (terms.length === 0) return [];
+  const results = [];
+  for (const node of allRecipes(state.tree)){
+    const items = await getIngredientItems(node);
+    const matched = [];
+    let hasAll = true;
+    for (const term of terms){
+      const hit = items.find(it => it.includes(term) || term.includes(it));
+      if (!hit){ hasAll = false; break; }
+      matched.push(term);
+    }
+    if (hasAll) results.push({ node, matched });
+  }
+  return results;
+}
+
+/* ======================= Rendering: sidebar tree ======================= */
+function renderTree(){
+  treeWrap.innerHTML = '';
+  if (!state.tree){ return; }
+  const rootRow = document.createElement('div');
+  rootRow.className = 'tree-node';
+  treeWrap.appendChild(buildTreeRow(state.tree, true));
+}
+
+function buildTreeRow(node, isRoot=false){
+  const wrap = document.createElement('div');
+  wrap.className = 'tree-node';
+
+  const row = document.createElement('div');
+  row.className = 'tree-row' + (state.selectedFolderPath === node.path ? ' active' : '');
+  const isExpanded = state.expanded.has(node.path);
+  const hasChildren = node.children.some(c => c.kind === 'directory');
+
+  row.innerHTML = `
+    <span class="caret">${hasChildren ? (isExpanded ? '▾' : '▸') : ''}</span>
+    <span>${isRoot ? '🏡' : '📁'} ${escapeHtml(node.name)}</span>
+  `;
+  row.onclick = () => {
+    if (hasChildren){
+      if (isExpanded) state.expanded.delete(node.path); else state.expanded.add(node.path);
+    }
+    state.selectedFolderPath = node.path;
+    state.selectedRecipeNode = null;
+    renderTree();
+    renderMain();
+  };
+  wrap.appendChild(row);
+
+  if (isExpanded){
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-children';
+    const dirChildren = node.children.filter(c => c.kind === 'directory');
+    const fileChildren = node.children.filter(c => c.kind === 'file');
+
+    dirChildren.forEach(c => childWrap.appendChild(buildTreeRow(c)));
+
+    fileChildren.forEach(f => {
+      const frow = document.createElement('div');
+      frow.className = 'tree-row' + (state.selectedRecipeNode && state.selectedRecipeNode.path === f.path ? ' active' : '');
+      frow.innerHTML = `<span class="caret"></span><span>🎀 ${escapeHtml(f.name.replace(/\.md$/i,''))}</span>`;
+      frow.onclick = (e) => {
+        e.stopPropagation();
+        openRecipe(f);
+      };
+      childWrap.appendChild(frow);
+    });
+
+    if (dirChildren.length === 0 && fileChildren.length === 0){
+      const hint = document.createElement('div');
+      hint.className = 'tree-empty-hint';
+      hint.textContent = 'empty';
+      childWrap.appendChild(hint);
+    }
+
+    wrap.appendChild(childWrap);
+  }
+
+  return wrap;
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ======================= Markdown parse / serialize ======================= */
+function parseRecipeMarkdown(text){
+  const recipe = { title:'', servings:'', prepTime:'', cookTime:'', ingredients:[], instructions:[], notes:'' };
+
+  const titleMatch = text.match(/^#\s+(.+)$/m);
+  recipe.title = titleMatch ? titleMatch[1].trim() : '';
+
+  const servingsMatch = text.match(/\*\*Servings:\*\*\s*(.+)/i);
+  if (servingsMatch) recipe.servings = servingsMatch[1].trim();
+  const prepMatch = text.match(/\*\*Prep Time:\*\*\s*(.+)/i);
+  if (prepMatch) recipe.prepTime = prepMatch[1].trim();
+  const cookMatch = text.match(/\*\*Cook Time:\*\*\s*(.+)/i);
+  if (cookMatch) recipe.cookTime = cookMatch[1].trim();
+
+  const section = (name) => {
+    const re = new RegExp(`##\\s*${name}\\s*\\n([\\s\\S]*?)(?=\\n##\\s|$)`, 'i');
+    const m = text.match(re);
+    return m ? m[1].trim() : '';
+  };
+
+  const ingredientsBlock = section('Ingredients');
+  if (ingredientsBlock){
+    ingredientsBlock.split('\n').forEach(line=>{
+      const l = line.replace(/^[-*]\s*/, '').trim();
+      if (!l) return;
+      const m = l.match(/^([\d.\/\s]+)?\s*([a-zA-Z]+)?\s*(.*)$/);
+      let amount='', unit='', item=l;
+      if (m){
+        const knownUnits = ['cup','cups','tbsp','tablespoon','tablespoons','tsp','teaspoon','teaspoons','g','gram','grams','kg','oz','ounce','ounces','lb','lbs','pound','pounds','ml','l','liter','liters','pinch','clove','cloves','slice','slices','can','cans','whole','dash'];
+        if (m[1] && m[1].trim()) amount = m[1].trim();
+        if (m[2] && knownUnits.includes(m[2].toLowerCase())){
+          unit = m[2];
+          item = m[3].trim();
+        } else {
+          item = ((m[2]||'') + ' ' + (m[3]||'')).trim();
+        }
+      }
+      recipe.ingredients.push({ amount, unit, item: item || l });
+    });
+  }
+
+  const instructionsBlock = section('Instructions');
+  if (instructionsBlock){
+    instructionsBlock.split('\n').forEach(line=>{
+      const l = line.replace(/^\d+\.\s*/, '').trim();
+      if (l) recipe.instructions.push(l);
+    });
+  }
+
+  recipe.notes = section('Notes');
+
+  return recipe;
+}
+
+function serializeRecipe(r){
+  let out = `# ${r.title || 'Untitled Recipe'}\n\n`;
+  if (r.servings) out += `**Servings:** ${r.servings}\n`;
+  if (r.prepTime) out += `**Prep Time:** ${r.prepTime}\n`;
+  if (r.cookTime) out += `**Cook Time:** ${r.cookTime}\n`;
+  out += `\n## Ingredients\n\n`;
+  (r.ingredients||[]).forEach(ing=>{
+    if (!ing.item && !ing.amount) return;
+    const parts = [ing.amount, ing.unit, ing.item].filter(Boolean);
+    out += `- ${parts.join(' ')}\n`;
+  });
+  out += `\n## Instructions\n\n`;
+  (r.instructions||[]).forEach((step, i)=>{
+    if (!step) return;
+    out += `${i+1}. ${step}\n`;
+  });
+  if (r.notes && r.notes.trim()){
+    out += `\n## Notes\n\n${r.notes.trim()}\n`;
+  }
+  return out;
+}
+
+/* ======================= Main area rendering ======================= */
+let renderToken = 0; // bumped on every render request so stale async ingredient
+                      // searches don't overwrite a newer one while typing fast
+
+async function renderMain(){
+  if (!state.tree){ return; }
+  const myToken = ++renderToken;
+  if (state.selectedRecipeNode){
+    await renderRecipeDetail(state.selectedRecipeNode);
+  } else {
+    await renderFolderList(state.selectedFolderPath, myToken);
+  }
+}
+
+function breadcrumbFor(path){
+  const parts = path ? path.split('/') : [];
+  let html = `<span class="crumb" data-path="">🏡 ${escapeHtml(state.tree.name)}</span>`;
+  let acc = '';
+  parts.forEach(p=>{
+    acc = acc ? `${acc}/${p}` : p;
+    html += ` <span class="sep">›</span> <span class="crumb" data-path="${escapeHtml(acc)}">${escapeHtml(p)}</span>`;
+  });
+  return html;
+}
+
+async function renderFolderList(path, myToken){
+  const node = findNode(path) || state.tree;
+  const isIngredientSearch = state.searchMode === 'ingredients' && state.searchTerm;
+  const isTitleSearch = state.searchMode === 'title' && state.searchTerm;
+
+  let recipes = [];
+  let matchedByPath = {};
+  let heading = null;
+
+  if (isIngredientSearch){
+    // Loading placeholder while we read + parse every recipe file
+    mainArea.innerHTML = `
+      <div class="topbar"><div class="breadcrumb">🥚 Searching ingredients…</div></div>
+      <div class="empty-state"><span class="big">🔎</span>Looking through your recipes…</div>
+    `;
+    const results = await searchRecipesByIngredients(state.searchTerm);
+    if (myToken !== renderToken) return; // a newer search started while we waited
+    recipes = results.map(r => r.node);
+    results.forEach(r => matchedByPath[r.node.path] = r.matched);
+    const terms = state.searchTerm.split(',').map(t=>t.trim()).filter(Boolean);
+    heading = `Recipes with: ${terms.join(', ')}`;
+  } else if (isTitleSearch){
+    recipes = allRecipes(state.tree).filter(r => r.name.toLowerCase().includes(state.searchTerm.toLowerCase()));
+    heading = `Search results for "${state.searchTerm}"`;
+  } else {
+    recipes = node.children.filter(c => c.kind === 'file');
+  }
+
+  mainArea.innerHTML = `
+    <div class="topbar">
+      <div class="breadcrumb">${heading ? `${isIngredientSearch ? '🥚' : '🔍'} ${escapeHtml(heading)}` : breadcrumbFor(path)}</div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" id="qNewCategory">✨ New Category</button>
+        <button class="btn btn-primary btn-sm" id="qNewRecipe">📝 New Recipe</button>
+      </div>
+    </div>
+    <div id="listHost"></div>
+  `;
+  $('#qNewCategory').onclick = () => openNewCategoryModal(path);
+  $('#qNewRecipe').onclick = () => openNewRecipeModal(path);
+  mainArea.querySelectorAll('.crumb').forEach(el=>{
+    el.onclick = () => {
+      state.selectedFolderPath = el.dataset.path;
+      state.searchTerm = '';
+      $('#searchInput').value = '';
+      renderTree();
+      renderMain();
+    };
+  });
+
+  const host = $('#listHost');
+  if (recipes.length === 0){
+    const emptyMsg = isIngredientSearch
+      ? `No recipes have all of those ingredients yet.`
+      : `No recipes here yet.<br>Click "New Recipe" to add your first one!`;
+    host.innerHTML = `<div class="empty-state"><span class="big">🍰</span>${emptyMsg}</div>`;
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'recipe-grid';
+  recipes.forEach(r=>{
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    const folderLabel = (isIngredientSearch || isTitleSearch) ? (r.path.includes('/') ? r.path.split('/').slice(0,-1).join(' / ') : '') : '';
+    const matchChips = isIngredientSearch
+      ? (matchedByPath[r.path] || []).map(m => `<span class="ingredient-chip">🥚 ${escapeHtml(m)}</span>`).join('')
+      : '';
+    card.innerHTML = `
+      <span class="ribbon">recipe</span>
+      <h3>${escapeHtml(r.name.replace(/\.md$/i,''))}</h3>
+      <div class="meta">${folderLabel ? `<span>📁 ${escapeHtml(folderLabel)}</span>` : (isIngredientSearch ? '' : '<span class="heart">♡ tap to view</span>')}</div>
+      ${matchChips ? `<div style="margin-top:8px;">${matchChips}</div>` : ''}
+    `;
+    card.onclick = () => openRecipe(r);
+    grid.appendChild(card);
+  });
+  host.appendChild(grid);
+}
+
+async function openRecipe(node){
+  state.selectedRecipeNode = node;
+  // set selected folder to parent for breadcrumb context
+  state.selectedFolderPath = node.path.includes('/') ? node.path.split('/').slice(0,-1).join('/') : '';
+  renderTree();
+  renderMain();
+}
+
+async function renderRecipeDetail(node){
+  const file = await node.handle.getFile();
+  const text = await file.text();
+  const r = parseRecipeMarkdown(text);
+
+  mainArea.innerHTML = `
+    <div class="topbar">
+      <div class="breadcrumb">${breadcrumbFor(state.selectedFolderPath)} <span class="sep">›</span> <span>🎀 ${escapeHtml(r.title || node.name)}</span></div>
+    </div>
+    <div class="recipe-detail">
+      <h1>${escapeHtml(r.title || node.name.replace(/\.md$/i,''))}</h1>
+      <div class="recipe-meta-row">
+        ${r.servings ? `<span>🍽️ <b>${escapeHtml(r.servings)}</b> servings</span>` : ''}
+        ${r.prepTime ? `<span>⏱️ prep <b>${escapeHtml(r.prepTime)}</b></span>` : ''}
+        ${r.cookTime ? `<span>🔥 cook <b>${escapeHtml(r.cookTime)}</b></span>` : ''}
+      </div>
+
+      <div class="section-title">💗 Ingredients</div>
+      <ul class="ingredients">
+        ${r.ingredients.map(i => `<li>${escapeHtml([i.amount,i.unit,i.item].filter(Boolean).join(' '))}</li>`).join('') || '<li style="opacity:.6">No ingredients listed</li>'}
+      </ul>
+
+      <div class="section-title">🌸 Instructions</div>
+      <ol class="instructions">
+        ${r.instructions.map(s => `<li>${escapeHtml(s)}</li>`).join('') || '<li style="opacity:.6">No instructions listed</li>'}
+      </ol>
+
+      ${r.notes ? `<div class="section-title">💌 Notes</div><div class="notes-box">${escapeHtml(r.notes)}</div>` : ''}
+
+      <div class="detail-actions">
+        <button class="btn btn-primary btn-sm" id="btnEditRecipe">✏️ Edit</button>
+        <button class="btn btn-lavender btn-sm" id="btnMoveRecipe">💌 Move</button>
+        <button class="btn btn-outline btn-sm" id="btnRenameRecipe">🏷️ Rename</button>
+        <button class="btn btn-danger btn-sm" id="btnDeleteRecipe">🗑️ Delete</button>
+      </div>
+    </div>
+  `;
+  mainArea.querySelectorAll('.crumb').forEach(el=>{
+    el.onclick = () => {
+      state.selectedFolderPath = el.dataset.path;
+      state.selectedRecipeNode = null;
+      renderTree();
+      renderMain();
+    };
+  });
+  $('#btnEditRecipe').onclick = () => renderEditForm(node, r);
+  $('#btnMoveRecipe').onclick = () => openMoveModal(node);
+  $('#btnRenameRecipe').onclick = () => openRenameModal(node, r);
+  $('#btnDeleteRecipe').onclick = () => openDeleteConfirm(node);
+}
+
+/* ======================= Edit form ======================= */
+function renderEditForm(node, r){
+  mainArea.innerHTML = `
+    <div class="topbar">
+      <div class="breadcrumb">✏️ Editing "${escapeHtml(r.title || node.name)}"</div>
+    </div>
+    <div class="edit-form">
+      <div class="field">
+        <label>Recipe Title</label>
+        <input type="text" id="fTitle" value="${escapeHtml(r.title)}">
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Servings</label><input type="text" id="fServings" value="${escapeHtml(r.servings)}"></div>
+        <div class="field"><label>Prep Time</label><input type="text" id="fPrep" value="${escapeHtml(r.prepTime)}"></div>
+        <div class="field"><label>Cook Time</label><input type="text" id="fCook" value="${escapeHtml(r.cookTime)}"></div>
+      </div>
+
+      <div class="section-title">💗 Ingredients</div>
+      <div id="ingredientRows"></div>
+      <button class="add-row-btn" id="addIngredient">+ add ingredient</button>
+
+      <div class="section-title">🌸 Instructions</div>
+      <div id="instructionRows"></div>
+      <button class="add-row-btn" id="addInstruction">+ add step</button>
+
+      <div class="field" style="margin-top:20px;">
+        <label>💌 Notes</label>
+        <textarea id="fNotes" rows="3">${escapeHtml(r.notes)}</textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="cancelEdit">Cancel</button>
+        <button class="btn btn-primary" id="saveRecipe">💾 Save Recipe</button>
+      </div>
+    </div>
+  `;
+
+  const ingWrap = $('#ingredientRows');
+  const insWrap = $('#instructionRows');
+
+  function addIngredientRow(ing={amount:'',unit:'',item:''}){
+    const row = document.createElement('div');
+    row.className = 'dyn-row';
+    row.innerHTML = `
+      <input class="amt" placeholder="amt" value="${escapeHtml(ing.amount)}">
+      <input class="unit" placeholder="unit" value="${escapeHtml(ing.unit)}">
+      <input class="item" placeholder="ingredient" value="${escapeHtml(ing.item)}">
+      <button class="icon-btn" title="remove">✕</button>
+    `;
+    row.querySelector('.icon-btn').onclick = () => row.remove();
+    ingWrap.appendChild(row);
+  }
+  function addInstructionRow(step='', idx){
+    const row = document.createElement('div');
+    row.className = 'dyn-row';
+    row.innerHTML = `
+      <span class="step-num">${ingWrap ? '' : ''}#</span>
+      <textarea class="item" rows="1" placeholder="What to do in this step...">${escapeHtml(step)}</textarea>
+      <button class="icon-btn" title="remove">✕</button>
+    `;
+    row.querySelector('.icon-btn').onclick = () => { row.remove(); renumberSteps(); };
+    insWrap.appendChild(row);
+    renumberSteps();
+  }
+  function renumberSteps(){
+    insWrap.querySelectorAll('.dyn-row').forEach((row,i)=>{
+      row.querySelector('.step-num').textContent = i+1;
+    });
+  }
+
+  (r.ingredients.length ? r.ingredients : [{amount:'',unit:'',item:''}]).forEach(addIngredientRow);
+  (r.instructions.length ? r.instructions : ['']).forEach(s => addInstructionRow(s));
+
+  $('#addIngredient').onclick = () => addIngredientRow();
+  $('#addInstruction').onclick = () => addInstructionRow();
+  $('#cancelEdit').onclick = () => renderRecipeDetail(node);
+
+  $('#saveRecipe').onclick = async () => {
+    const newRecipe = {
+      title: $('#fTitle').value.trim() || node.name.replace(/\.md$/i,''),
+      servings: $('#fServings').value.trim(),
+      prepTime: $('#fPrep').value.trim(),
+      cookTime: $('#fCook').value.trim(),
+      notes: $('#fNotes').value.trim(),
+      ingredients: [...ingWrap.querySelectorAll('.dyn-row')].map(row => ({
+        amount: row.querySelector('.amt').value.trim(),
+        unit: row.querySelector('.unit').value.trim(),
+        item: row.querySelector('.item').value.trim(),
+      })).filter(i => i.item || i.amount),
+      instructions: [...insWrap.querySelectorAll('.dyn-row')].map(row => row.querySelector('.item').value.trim()).filter(Boolean),
+    };
+    const md = serializeRecipe(newRecipe);
+    const writable = await node.handle.createWritable();
+    await writable.write(md);
+    await writable.close();
+    toast('Recipe saved! 💖');
+    await loadTree();
+    // find the (possibly same-path) node again and open it
+    const refreshed = findNode(node.path) || node;
+    openRecipe(refreshed);
+  };
+}
+
+/* ======================= New Category / New Recipe modals ======================= */
+function populateFolderSelect(selectEl, excludePath=null){
+  selectEl.innerHTML = '';
+  allFolders().forEach(f=>{
+    if (excludePath !== null && f.path === excludePath) return;
+    const opt = document.createElement('option');
+    opt.value = f.path;
+    const depth = f.path ? f.path.split('/').length : 0;
+    opt.textContent = (depth ? '　'.repeat(depth) + '↳ ' : '') + (f.path ? f.name : `${f.name} (root)`);
+    selectEl.appendChild(opt);
+  });
+}
+
+function openNewCategoryModal(defaultPath){
+  populateFolderSelect($('#newCategoryParent'));
+  $('#newCategoryParent').value = defaultPath ?? state.selectedFolderPath ?? '';
+  $('#newCategoryName').value = '';
+  dlgNewCategory.showModal();
+}
+$('#btnNewCategory').onclick = () => openNewCategoryModal(state.selectedFolderPath);
+$('#confirmNewCategory').onclick = async () => {
+  const name = $('#newCategoryName').value.trim();
+  if (!name) return toast('Please enter a category name');
+  const parentPath = $('#newCategoryParent').value;
+  const parentNode = findNode(parentPath) || state.tree;
+  try{
+    await parentNode.handle.getDirectoryHandle(name, { create: true });
+    await loadTree();
+    state.expanded.add(parentPath);
+    state.selectedFolderPath = parentPath ? `${parentPath}/${name}` : name;
+    renderTree(); renderMain();
+    toast(`Category "${name}" created 🌷`);
+    dlgNewCategory.close();
+  }catch(e){ console.error(e); toast('Could not create category'); }
+};
+
+function openNewRecipeModal(defaultPath){
+  populateFolderSelect($('#newRecipeParent'));
+  $('#newRecipeParent').value = defaultPath ?? state.selectedFolderPath ?? '';
+  $('#newRecipeName').value = '';
+  dlgNewRecipe.showModal();
+}
+$('#btnNewRecipe').onclick = () => openNewRecipeModal(state.selectedFolderPath);
+$('#confirmNewRecipe').onclick = async () => {
+  const title = $('#newRecipeName').value.trim();
+  if (!title) return toast('Please enter a recipe title');
+  const parentPath = $('#newRecipeParent').value;
+  const parentNode = findNode(parentPath) || state.tree;
+  const fileName = `${title}.md`;
+  try{
+    const existing = await hasEntry(parentNode.handle, fileName);
+    if (existing) return toast('A recipe with that name already exists there');
+    const fh = await parentNode.handle.getFileHandle(fileName, { create: true });
+    const md = serializeRecipe({ title, servings:'', prepTime:'', cookTime:'', ingredients:[{amount:'',unit:'',item:''}], instructions:[''], notes:'' });
+    const writable = await fh.createWritable();
+    await writable.write(md);
+    await writable.close();
+    await loadTree();
+    dlgNewRecipe.close();
+    const node = findNode(parentPath ? `${parentPath}/${fileName}` : fileName);
+    if (node) { openRecipe(node); renderEditForm(node, parseRecipeMarkdown(md)); }
+    toast('New recipe created 📝');
+  }catch(e){ console.error(e); toast('Could not create recipe'); }
+};
+
+async function hasEntry(dirHandle, name){
+  for await (const key of dirHandle.keys()){
+    if (key === name) return true;
+  }
+  return false;
+}
+
+/* ======================= Move ======================= */
+let moveContextNode = null;
+function openMoveModal(node){
+  moveContextNode = node;
+  const currentParent = node.path.includes('/') ? node.path.split('/').slice(0,-1).join('/') : '';
+  populateFolderSelect($('#moveTarget'), currentParent);
+  dlgMove.showModal();
+}
+$('#confirmMove').onclick = async () => {
+  const targetPath = $('#moveTarget').value;
+  const targetNode = findNode(targetPath) || state.tree;
+  try{
+    const file = await moveContextNode.handle.getFile();
+    const text = await file.text();
+    const exists = await hasEntry(targetNode.handle, moveContextNode.name);
+    if (exists) return toast('A recipe with that name already exists there');
+    const newFh = await targetNode.handle.getFileHandle(moveContextNode.name, { create: true });
+    const writable = await newFh.createWritable();
+    await writable.write(text);
+    await writable.close();
+    const oldParentPath = moveContextNode.path.includes('/') ? moveContextNode.path.split('/').slice(0,-1).join('/') : '';
+    const oldParentNode = findNode(oldParentPath) || state.tree;
+    await oldParentNode.handle.removeEntry(moveContextNode.name);
+    await loadTree();
+    dlgMove.close();
+    const newNode = findNode(targetPath ? `${targetPath}/${moveContextNode.name}` : moveContextNode.name);
+    if (newNode) openRecipe(newNode);
+    toast('Recipe moved 💌');
+  }catch(e){ console.error(e); toast('Could not move recipe'); }
+};
+
+/* ======================= Rename ======================= */
+let renameContextNode = null;
+function openRenameModal(node, r){
+  renameContextNode = node;
+  $('#renameValue').value = r.title || node.name.replace(/\.md$/i,'');
+  dlgRename.showModal();
+}
+$('#confirmRename').onclick = async () => {
+  const newTitle = $('#renameValue').value.trim();
+  if (!newTitle) return toast('Please enter a title');
+  const newFileName = `${newTitle}.md`;
+  const parentPath = renameContextNode.path.includes('/') ? renameContextNode.path.split('/').slice(0,-1).join('/') : '';
+  const parentNode = findNode(parentPath) || state.tree;
+  try{
+    if (newFileName !== renameContextNode.name){
+      const exists = await hasEntry(parentNode.handle, newFileName);
+      if (exists) return toast('A recipe with that name already exists there');
+    }
+    const file = await renameContextNode.handle.getFile();
+    const text = await file.text();
+    const parsed = parseRecipeMarkdown(text);
+    parsed.title = newTitle;
+    const newText = serializeRecipe(parsed);
+    const newFh = await parentNode.handle.getFileHandle(newFileName, { create: true });
+    const writable = await newFh.createWritable();
+    await writable.write(newText);
+    await writable.close();
+    if (newFileName !== renameContextNode.name){
+      await parentNode.handle.removeEntry(renameContextNode.name);
+    }
+    await loadTree();
+    dlgRename.close();
+    const newNode = findNode(parentPath ? `${parentPath}/${newFileName}` : newFileName);
+    if (newNode) openRecipe(newNode);
+    toast('Recipe renamed 🏷️');
+  }catch(e){ console.error(e); toast('Could not rename recipe'); }
+};
+
+/* ======================= Delete ======================= */
+let deleteContext = null;
+function openDeleteConfirm(node){
+  deleteContext = node;
+  $('#confirmTitle').textContent = '🗑️ Delete Recipe?';
+  $('#confirmMessage').textContent = `"${node.name.replace(/\.md$/i,'')}" will be permanently deleted. This cannot be undone.`;
+  dlgConfirm.showModal();
+}
+$('#confirmDeleteBtn').onclick = async () => {
+  if (!deleteContext) return;
+  const parentPath = deleteContext.path.includes('/') ? deleteContext.path.split('/').slice(0,-1).join('/') : '';
+  const parentNode = findNode(parentPath) || state.tree;
+  try{
+    await parentNode.handle.removeEntry(deleteContext.name, { recursive: true });
+    state.selectedRecipeNode = null;
+    state.selectedFolderPath = parentPath;
+    await loadTree();
+    dlgConfirm.close();
+    toast('Deleted 🗑️');
+  }catch(e){ console.error(e); toast('Could not delete'); }
+};
+
+/* ======================= Search ======================= */
+function debounce(fn, delay){
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(()=> fn(...args), delay);
+  };
+}
+
+const runSearch = debounce((value)=>{
+  state.searchTerm = value.trim();
+  state.selectedRecipeNode = null;
+  renderMain();
+}, 300);
+
+$('#searchInput').addEventListener('input', (e)=>{
+  runSearch(e.target.value);
+});
+
+function setSearchMode(mode){
+  state.searchMode = mode;
+  $('#modeTitleBtn').classList.toggle('active', mode === 'title');
+  $('#modeIngredientBtn').classList.toggle('active', mode === 'ingredients');
+  $('#searchIcon').textContent = mode === 'ingredients' ? '🥚' : '🔍';
+  $('#searchInput').placeholder = mode === 'ingredients' ? 'eggs, milk...' : 'Search recipes...';
+  $('#ingredientHint').style.display = mode === 'ingredients' ? 'block' : 'none';
+  if (state.searchTerm){
+    state.selectedRecipeNode = null;
+    renderMain();
+  }
+}
+$('#modeTitleBtn').onclick = () => setSearchMode('title');
+$('#modeIngredientBtn').onclick = () => setSearchMode('ingredients');
+
+/* ======================= Wire up open buttons ======================= */
+$('#btnOpenFolder').onclick = openFolder;
+$('#btnOpenFolderCenter').onclick = openFolder;
+
+/* ======================= Init ======================= */
+tryRestoreFolder();
+</script>
+</body>
+</html>
